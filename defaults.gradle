@@ -1,0 +1,11 @@
+dependencies {
+    implementation(Libs.kotlin_serialization_core)
+
+    testImplementation(Libs.junit)
+    testImplementation(Libs.truth)
+    testImplementation(Libs.kluent)
+    testImplementation(Libs.mockitoCore)
+    testImplementation(Libs.mockitoInline)
+    testImplementation(Libs.mockK)
+    testImplementation(Libs.kotlin_coroutines_test)
+}
