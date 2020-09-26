@@ -1,0 +1,7 @@
+# http://editorconfig.org
+# https://github.com/pinterest/ktlint#custom-editorconfig-properties
+root = true
+
+[*.{kt, kts}]
+kotlin_imports_layout = idea
+max_line_length = off

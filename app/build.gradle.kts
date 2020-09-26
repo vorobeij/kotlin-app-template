@@ -13,3 +13,5 @@ dependencies {
     implementation(Libs.reactive_streams_examples)
     implementation(Libs.jackson_annotations)
 }
+
+apply(from = "../ktlint.gradle.kts")

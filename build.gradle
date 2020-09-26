@@ -8,6 +8,7 @@ buildscript {
 
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.4.10"
+        classpath("com.pinterest:ktlint:0.38.1")
     }
 }
 
