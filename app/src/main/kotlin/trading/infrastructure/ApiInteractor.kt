@@ -1,9 +1,8 @@
-package trading
+package trading.infrastructure
 
 import ru.tinkoff.invest.openapi.OpenApi
 import ru.tinkoff.invest.openapi.SandboxOpenApi
 import ru.tinkoff.invest.openapi.okhttp.OkHttpOpenApiFactory
-import trading.infrastructure.logger
 import trading.models.AuthParameters
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executors

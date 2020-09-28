@@ -1,4 +1,4 @@
-package trading
+package trading.api
 
 import ru.tinkoff.invest.openapi.OpenApi
 import ru.tinkoff.invest.openapi.models.market.Candle
@@ -10,11 +10,11 @@ import trading.infrastructure.splitTimeIntervalByYears
 import java.time.OffsetDateTime
 import java.util.Optional
 
-class MarketApi(
+class MarketApiImpl(
     private val api: OpenApi
-) {
+) : MarketApi {
 
-    fun loadHistory(
+    override fun loadHistory(
         ticker: String,
         from: OffsetDateTime,
         to: OffsetDateTime,
@@ -26,7 +26,7 @@ class MarketApi(
         return loadHistoryFull(instrument, from, to, interval).candles
     }
 
-    fun getInstrument(ticker: String): Instrument {
+    override fun getInstrument(ticker: String): Instrument {
         logger.info("Searching by ticker $ticker... ")
         val instrumentOpt: Optional<Instrument> = api.marketContext.searchMarketInstrumentsByTicker(ticker)
             .join()
