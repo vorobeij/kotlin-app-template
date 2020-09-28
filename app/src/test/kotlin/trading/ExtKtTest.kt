@@ -2,6 +2,7 @@ package trading
 
 import com.google.common.truth.Truth
 import org.junit.Test
+import trading.infrastructure.splitTimeIntervalByYears
 import java.time.OffsetDateTime
 
 class ExtKtTest {

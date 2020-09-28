@@ -1,4 +1,4 @@
-package trading
+package trading.infrastructure
 
 import java.time.OffsetDateTime
 

@@ -1,5 +1,6 @@
-package trading
+package trading.infrastructure
 
+import trading.App
 import java.io.FileNotFoundException
 import java.nio.file.Files
 import java.nio.file.Paths

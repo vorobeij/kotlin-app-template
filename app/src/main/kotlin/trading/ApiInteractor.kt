@@ -3,6 +3,8 @@ package trading
 import ru.tinkoff.invest.openapi.OpenApi
 import ru.tinkoff.invest.openapi.SandboxOpenApi
 import ru.tinkoff.invest.openapi.okhttp.OkHttpOpenApiFactory
+import trading.infrastructure.logger
+import trading.models.AuthParameters
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executors
 import java.util.logging.Level
@@ -11,7 +13,7 @@ import java.util.logging.Logger
 class ApiInteractor {
 
     fun runSafely(
-        parameters: TradingParameters,
+        parameters: AuthParameters,
         block: (api: OpenApi) -> Unit
     ) {
         val factory = OkHttpOpenApiFactory(parameters.ssoToken, logger)

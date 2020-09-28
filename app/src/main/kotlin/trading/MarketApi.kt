@@ -5,10 +5,12 @@ import ru.tinkoff.invest.openapi.models.market.Candle
 import ru.tinkoff.invest.openapi.models.market.CandleInterval
 import ru.tinkoff.invest.openapi.models.market.HistoricalCandles
 import ru.tinkoff.invest.openapi.models.market.Instrument
+import trading.infrastructure.logger
+import trading.infrastructure.splitTimeIntervalByYears
 import java.time.OffsetDateTime
 import java.util.Optional
 
-class HistoryApi(
+class MarketApi(
     private val api: OpenApi
 ) {
 
