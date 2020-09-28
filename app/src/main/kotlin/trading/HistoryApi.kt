@@ -24,6 +24,21 @@ class HistoryApi(
         return loadHistoryFull(instrument, from, to, interval).candles
     }
 
+    fun getInstrument(ticker: String): Instrument {
+        logger.info("Searching by ticker $ticker... ")
+        val instrumentOpt: Optional<Instrument> = api.marketContext.searchMarketInstrumentsByTicker(ticker)
+            .join()
+            .instruments
+            .stream()
+            .findFirst()
+
+        return if (instrumentOpt.isEmpty) {
+            error("This ticker is not found")
+        } else {
+            instrumentOpt.get()
+        }
+    }
+
     private fun loadHistoryFull(
         instrument: Instrument,
         from: OffsetDateTime,
@@ -53,29 +68,10 @@ class HistoryApi(
         interval: CandleInterval
     ): HistoricalCandles {
         val candlesOpt = api.marketContext.getMarketCandles(instrument.figi, from, to, interval).join().stream().findFirst()
-        val historicalCandles: HistoricalCandles = if (candlesOpt.isEmpty) {
+        return if (candlesOpt.isEmpty) {
             error("candles empty")
         } else {
             candlesOpt.get()
         }
-        return historicalCandles
-    }
-
-    fun getInstrument(ticker: String): Instrument {
-        logger.info("Searching by ticker $ticker... ")
-        val instrumentOpt: Optional<Instrument> = api.marketContext.searchMarketInstrumentsByTicker(ticker)
-            .join()
-            .instruments
-            .stream()
-            .findFirst()
-
-        val instrument: Instrument = if (instrumentOpt.isEmpty) {
-            logger.severe("This ticker is not found")
-            error("")
-        } else {
-            instrumentOpt.get()
-        }
-        return instrument
     }
 }
-

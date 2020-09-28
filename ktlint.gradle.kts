@@ -15,7 +15,7 @@ val ktlintFormat by tasks.creating(JavaExec::class) {
     args = listOf("-F", "src/**/*.kt")
 }
 tasks {
-    getTasksByName("preBuild", false).forEach {
+    getTasksByName("clean", false).forEach {
         it.dependsOn(ktlintFormat)
     }
 }

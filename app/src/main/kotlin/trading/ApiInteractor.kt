@@ -42,13 +42,15 @@ class ApiInteractor {
         api: OpenApi,
         logger: Logger
     ) {
-        Runtime.getRuntime().addShutdownHook(Thread {
-            try {
-                logger.info("Закрываем соединение... ")
-                if (!api.hasClosed()) api.close()
-            } catch (e: Exception) {
-                logger.log(Level.SEVERE, "Что-то произошло при закрытии соединения!", e)
+        Runtime.getRuntime().addShutdownHook(
+            Thread {
+                try {
+                    logger.info("Закрываем соединение... ")
+                    if (!api.hasClosed()) api.close()
+                } catch (e: Exception) {
+                    logger.log(Level.SEVERE, "Что-то произошло при закрытии соединения!", e)
+                }
             }
-        })
+        )
     }
 }

@@ -8,7 +8,7 @@ fun splitTimeIntervalByYears(
 ): List<OffsetDateTime> {
     val intervals = mutableListOf<OffsetDateTime>()
     intervals.add(to)
-    while(intervals.last().minusYears(1).isAfter(from)){
+    while (intervals.last().minusYears(1).isAfter(from)) {
         intervals.add(intervals.last().minusYears(1))
     }
     intervals.add(from)
