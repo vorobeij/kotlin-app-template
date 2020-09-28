@@ -66,6 +66,8 @@ object Versions {
 
     const val moshi = "1.8.0"
 
+    const val koin = "2.1.6"
+
     object Test {
 
         const val androidx_core = "1.3.0"

@@ -82,4 +82,8 @@ object Libs {
     const val reactive_streams_examples = "org.reactivestreams:reactive-streams-examples:1.0.3"
     const val reactive_streams = "org.reactivestreams:reactive-streams:1.0.3"
     const val jupiter = "org.junit.jupiter:junit-jupiter:5.5.2"
+
+    const val koin_core = "org.koin:koin-core:" + Versions.koin
+    const val koin_core_ext = "org.koin:koin-core-ext:" + Versions.koin
+    const val koin_test = "org.koin:koin-test:" + Versions.koin
 }

@@ -16,6 +16,10 @@ dependencies {
     implementation(Libs.jackson_databind)
     implementation(Libs.jackson_datatype_jdk_8)
     implementation(Libs.jackson_datatype_jsr310)
+    implementation(Libs.koin_core)
+    implementation(Libs.koin_core_ext)
+
+    testImplementation(Libs.koin_test)
 }
 
 apply(from = "../ktlint.gradle.kts")
