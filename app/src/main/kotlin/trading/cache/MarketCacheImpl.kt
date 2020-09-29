@@ -12,6 +12,19 @@ class MarketCacheImpl(
     private val mapper: ObjectMapper
 ) : MarketCache {
 
+    class TickerFile(
+        private val ticker: String,
+        private val from: OffsetDateTime,
+        private val to: OffsetDateTime,
+        private val interval: CandleInterval
+    ) {
+
+        fun encode(): String {
+            val delimeter = "--"
+            return ticker + delimeter + from + delimeter + to + delimeter + interval
+        }
+    }
+
     override fun loadHistory(
         ticker: String,
         from: OffsetDateTime,
@@ -35,18 +48,5 @@ class MarketCacheImpl(
         candles: List<Candle>
     ) {
         mapper.writeValue(File(cacheRoot, TickerFile(ticker, from, to, interval).encode()), candles)
-    }
-
-    class TickerFile(
-        private val ticker: String,
-        private val from: OffsetDateTime,
-        private val to: OffsetDateTime,
-        private val interval: CandleInterval
-    ) {
-
-        fun encode(): String {
-            val delimeter = "--"
-            return ticker + delimeter + from + delimeter + to + delimeter + interval
-        }
     }
 }

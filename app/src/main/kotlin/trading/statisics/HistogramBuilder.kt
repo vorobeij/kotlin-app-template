@@ -1,11 +1,14 @@
 package trading.statisics
 
 import java.math.BigDecimal
+import java.math.MathContext
 import kotlin.math.ceil
 
 class HistogramBuilder(
     private val values: List<BigDecimal>
 ) {
+
+    private val mc = MathContext(2)
 
     fun buildHistogram(): List<HistogramBar<BigDecimal>> {
 
@@ -14,7 +17,7 @@ class HistogramBuilder(
         val counts = values.toCountMap()
         val max = values.maxOrNull()!!
         val min = values.minOrNull()!!
-        val step = ceil(((max - min).toDouble() / counts.size)).toInt()
+        val step = (max - min).toDouble() / counts.size
         val intervals = ceil((max - min).toDouble() / step).toInt()
         return buildHist(values, if (intervals > 0) intervals else 1)
     }
@@ -28,36 +31,24 @@ class HistogramBuilder(
         val min = values.minOrNull()!!
         var max = values.maxOrNull()!!
         if (min == max) max = min + BigDecimal(1)
-        val step = (max - min) / numberOfIntervals.toBigDecimal()
+        val step: BigDecimal = (max - min) / BigDecimal(numberOfIntervals, mc)
         (0 until numberOfIntervals).map {
-            val start = min + step * it.toBigDecimal()
+            val start = min + step * BigDecimal(it, mc)
             val end = start + step
             bars.add(
                 HistogramBar(
-                    start, end,
+                    start.norm(),
+                    end.norm(),
                     values.filter { v -> v >= start && v < end }.count()
                 )
             )
         }
-        if (bars.any { it.count == 0 }) return buildHist(values, ceil(numberOfIntervals.toDouble() / 2).toInt())
+        if (bars.any { it.count == 0 }) {
+            val newNumberOfIntervals = ceil(numberOfIntervals.toDouble() * 0.9).toInt()
+            return if (newNumberOfIntervals == numberOfIntervals) bars else buildHist(values, newNumberOfIntervals)
+        }
         return bars
     }
 
-    fun printConsole(): String {
-        val hist = buildHistogram()
-        val max = hist.maxByOrNull { it.count }!!.count
-        val divider = max / 30.0
-        val maxStartSize = hist.maxByOrNull { it.start.toString().length }!!.start.toString().length
-        return hist.map {
-            "%${maxStartSize}s".format(it.start.toString()) + " " + "=".repeat((it.count / divider).toInt()) + " " + it.count
-        }.joinToString("\n")
-    }
-
-    fun css(delimiter: String = ";"): String {
-
-        val hist = buildHistogram()
-        return hist
-            .map { it.start.toString() + delimiter + it.end.toString() + delimiter + it.count }
-            .joinToString("\n")
-    }
+    private fun BigDecimal.norm() = BigDecimal(this.toDouble(), mc)
 }

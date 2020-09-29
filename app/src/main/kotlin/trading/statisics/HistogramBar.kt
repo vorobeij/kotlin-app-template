@@ -5,4 +5,3 @@ data class HistogramBar<T>(
     val end: T,
     var count: Int
 )
-

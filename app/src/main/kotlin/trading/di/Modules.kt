@@ -11,6 +11,8 @@ import trading.api.MarketApiImpl
 import trading.cache.MarketCache
 import trading.cache.MarketCacheImpl
 import trading.repository.MarketRepository
+import trading.statisics.printer.ConsoleHistogramPrinter
+import trading.statisics.printer.HistogramPrinter
 
 fun marketModule(api: OpenApi) = module {
     single<OpenApi> { api }
@@ -24,4 +26,5 @@ fun marketModule(api: OpenApi) = module {
     factory<MarketApi> { MarketApiImpl(get()) }
     factory<MarketCache> { MarketCacheImpl("caches", get()) }
     factory<MarketRepository> { MarketRepository(get(), get()) }
+    factory<HistogramPrinter> { ConsoleHistogramPrinter() }
 }
