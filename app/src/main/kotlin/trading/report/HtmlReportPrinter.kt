@@ -9,12 +9,17 @@ import kotlinx.html.id
 import kotlinx.html.link
 import kotlinx.html.script
 import kotlinx.html.stream.appendHTML
+import kotlinx.html.table
+import kotlinx.html.td
 import kotlinx.html.title
+import kotlinx.html.tr
 import kotlinx.html.unsafe
+import org.nield.kotlinstatistics.descriptiveStatistics
 import trading.repository.HistoryRequest
 import trading.repository.MarketRepository
 import trading.statisics.DailyInvestmentsProfitProcessor
 import trading.statisics.ProfitDaysProcessor
+import java.text.DecimalFormat
 
 class HtmlReportPrinter(
     private val marketRepository: MarketRepository,
@@ -58,7 +63,7 @@ class HtmlReportPrinter(
         val dailyInvestmentsProfitProcessor = DailyInvestmentsProfitProcessor(period)
         val data = dailyInvestmentsProfitProcessor.values(candles)
 
-        chart(
+        histogramChart(
             historyRequest.ticker + "dailyProfit" + period,
             "Daily Buy - $period days profits",
             data
@@ -72,25 +77,28 @@ class HtmlReportPrinter(
         val candles = marketRepository.loadHistory(historyRequest)
         val profitDaysProcessor = ProfitDaysProcessor(profit)
         val data = profitDaysProcessor.values(candles)
-        chart(
+        histogramChart(
             historyRequest.ticker + "dailyProfit" + profit,
             "Profit return: $profit",
             data
         )
     }
 
-    private fun FlowContent.chart(
+    private fun FlowContent.histogramChart(
         chartId: String,
         title: String,
-        data: List<Number>
+        data: List<Number>,
+        color: String = Palette.blue,
+        opacity: Double = 0.9
     ) {
-        div(classes = "chart") {
-            id = chartId
-        }
-        script {
-            unsafe {
-                raw(
-                    """
+        div(classes = "chart-container") {
+            div(classes = "chart") {
+                id = chartId
+            }
+            script {
+                unsafe {
+                    raw(
+                        """
                         var x = [${data.joinToString(",")}];
                         var layout = {
                           title: '$title',
@@ -104,12 +112,39 @@ class HtmlReportPrinter(
                         var trace = {
                             x: x,
                             type: 'histogram',
+                            opacity: $opacity,
+                            marker: {
+                             color: '$color',
+                            }
                           };
     
                         var data = [trace];
                         Plotly.newPlot('$chartId', data, layout);
                     """.trimIndent()
-                )
+                    )
+                }
+            }
+
+            val descriptiveStatistics = data.descriptiveStatistics
+
+            val stats = listOf<Pair<String, Double>>(
+                "size" to descriptiveStatistics.size.toDouble(),
+                "mean" to descriptiveStatistics.mean,
+                "percentile(5)" to descriptiveStatistics.percentile(5.0),
+                "percentile(95)" to descriptiveStatistics.percentile(95.0),
+                "standardDeviation" to descriptiveStatistics.standardDeviation,
+                "skewness" to descriptiveStatistics.skewness,
+                "kurtosis" to descriptiveStatistics.kurtosis,
+            )
+            div(classes = "chart-summary") {
+                table {
+                    stats.forEach {
+                        tr {
+                            td { +it.first }
+                            td { +DecimalFormat("#.##").format(it.second) }
+                        }
+                    }
+                }
             }
         }
     }

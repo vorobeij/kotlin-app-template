@@ -19,6 +19,7 @@ dependencies {
     implementation(Libs.koin_core)
     implementation(Libs.koin_core_ext)
     implementation(Libs.html)
+    implementation(Libs.statistics)
 
     testImplementation(Libs.koin_test)
 }

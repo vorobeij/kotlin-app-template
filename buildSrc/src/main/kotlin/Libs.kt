@@ -88,4 +88,5 @@ object Libs {
     const val koin_test = "org.koin:koin-test:" + Versions.koin
 
     const val html = "org.jetbrains.kotlinx:kotlinx-html-jvm:" + Versions.kotlinx_html_version
+    const val statistics = "org.nield:kotlin-statistics:1.2.1"
 }

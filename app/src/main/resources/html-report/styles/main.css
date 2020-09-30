@@ -15,6 +15,7 @@ body {
 }
 
 .ticket-section {
+  margin-top: 1em;
   /* margin-bottom: 1em;
   border-radius: 6px;
   overflow: scroll;
@@ -31,6 +32,16 @@ body {
   margin-left: 1em;
 }
 
-.chart-summary{
-  background-color: red;  
+.chart-summary {
+  align-content: center;
+  align-items: center;
+}
+
+.chart-container {}
+
+td {
+  padding-left: 0.5em;
+  padding-right: 0.5em;
+  padding-top: 0.2em;
+  padding-bottom: 0.2em;
 }
