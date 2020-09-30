@@ -18,6 +18,7 @@ dependencies {
     implementation(Libs.jackson_datatype_jsr310)
     implementation(Libs.koin_core)
     implementation(Libs.koin_core_ext)
+    implementation(Libs.html)
 
     testImplementation(Libs.koin_test)
 }

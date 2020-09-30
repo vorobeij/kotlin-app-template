@@ -86,4 +86,6 @@ object Libs {
     const val koin_core = "org.koin:koin-core:" + Versions.koin
     const val koin_core_ext = "org.koin:koin-core-ext:" + Versions.koin
     const val koin_test = "org.koin:koin-test:" + Versions.koin
+
+    const val html = "org.jetbrains.kotlinx:kotlinx-html-jvm:" + Versions.kotlinx_html_version
 }

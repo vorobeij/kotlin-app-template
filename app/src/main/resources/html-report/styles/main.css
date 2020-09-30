@@ -1,0 +1,36 @@
+body {
+  font-family: Trebuchet MS, roboto, ubuntu, sans-serif;
+  font-weight: 100;
+  color: #131722;
+  margin-top: 1em;
+}
+
+.chart {
+  width: 600px;
+  height: 400px;
+}
+
+.charts-section {
+  display: flex;
+}
+
+.ticket-section {
+  /* margin-bottom: 1em;
+  border-radius: 6px;
+  overflow: scroll;
+  padding: 0.5em;
+  box-shadow: 0 0 0 1px #e0e3eb;
+  background-color: #fff;
+  height: 100%;
+  box-sizing: border-box; */
+}
+
+.header {
+  /* text-align: center; */
+  font-size: 30px;
+  margin-left: 1em;
+}
+
+.chart-summary{
+  background-color: red;  
+}

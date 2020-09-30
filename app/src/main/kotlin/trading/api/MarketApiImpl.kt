@@ -7,6 +7,7 @@ import ru.tinkoff.invest.openapi.models.market.HistoricalCandles
 import ru.tinkoff.invest.openapi.models.market.Instrument
 import trading.infrastructure.logger
 import trading.infrastructure.splitTimeIntervalByYears
+import trading.repository.HistoryRequest
 import java.time.OffsetDateTime
 import java.util.Optional
 
@@ -15,15 +16,12 @@ class MarketApiImpl(
 ) : MarketApi {
 
     override fun loadHistory(
-        ticker: String,
-        from: OffsetDateTime,
-        to: OffsetDateTime,
-        interval: CandleInterval
+        request: HistoryRequest
     ): List<Candle> {
 
-        val instrument = getInstrument(ticker)
+        val instrument = getInstrument(request.ticker)
 
-        return loadHistoryFull(instrument, from, to, interval).candles
+        return loadHistoryFull(instrument, request.from, request.to, request.interval).candles
     }
 
     override fun getInstrument(ticker: String): Instrument {

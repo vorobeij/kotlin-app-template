@@ -1,23 +1,14 @@
 package trading.cache
 
 import ru.tinkoff.invest.openapi.models.market.Candle
-import ru.tinkoff.invest.openapi.models.market.CandleInterval
-import java.time.OffsetDateTime
+import trading.repository.HistoryRequest
 
 interface MarketCache {
 
-    fun loadHistory(
-        ticker: String,
-        from: OffsetDateTime,
-        to: OffsetDateTime,
-        interval: CandleInterval
-    ): List<Candle>?
+    fun loadHistory(request: HistoryRequest): List<Candle>?
 
     fun saveHistory(
-        ticker: String,
-        from: OffsetDateTime,
-        to: OffsetDateTime,
-        interval: CandleInterval,
+        request: HistoryRequest,
         candles: List<Candle>
     )
 }

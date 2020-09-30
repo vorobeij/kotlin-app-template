@@ -68,6 +68,8 @@ object Versions {
 
     const val koin = "2.1.6"
 
+    const val kotlinx_html_version = "0.7.2"
+
     object Test {
 
         const val androidx_core = "1.3.0"

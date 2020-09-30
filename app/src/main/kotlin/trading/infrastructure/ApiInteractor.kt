@@ -17,8 +17,9 @@ class ApiInteractor {
     ) {
         val factory = OkHttpOpenApiFactory(parameters.ssoToken, logger)
 
+        var api: OpenApi? = null
+
         try {
-            val api: OpenApi
             logger.info("Создаём подключение... ")
             if (parameters.sandboxMode) {
                 api = factory.createSandboxOpenApiClient(Executors.newSingleThreadExecutor())
@@ -36,6 +37,8 @@ class ApiInteractor {
             api.close()
         } catch (ex: Exception) {
             logger.log(Level.SEVERE, "Что-то пошло не так.", ex)
+            api?.close()
+            System.exit(-1)
         }
     }
 
