@@ -8,7 +8,11 @@ class ProfitDaysProcessor(
     private val profitPercent: Double
 ) : DistributionProcessor<Int> {
 
-    override fun values(history: List<Candle>): List<Int> {
+    override fun values(
+        history: List<Candle>,
+        start: Int,
+        end: Int
+    ): List<Int> {
         val values = mutableListOf<Int>()
 
         for (i in history.indices) {

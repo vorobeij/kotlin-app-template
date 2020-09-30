@@ -17,6 +17,7 @@ import kotlinx.html.unsafe
 import org.nield.kotlinstatistics.descriptiveStatistics
 import trading.repository.HistoryRequest
 import trading.repository.MarketRepository
+import trading.statisics.DailyInvestmentOutWithStats
 import trading.statisics.DailyInvestmentsProfitProcessor
 import trading.statisics.ProfitDaysProcessor
 import java.text.DecimalFormat
@@ -46,11 +47,13 @@ class HtmlReportPrinter(
             }
             div(classes = "charts-section") {
                 dailyProfit(historyRequest, 360)
-                dailyProfit(historyRequest, 2 * 360)
-                dailyProfit(historyRequest, 5 * 360)
-                profitReturnTime(historyRequest, 0.2)
-                profitReturnTime(historyRequest, 0.5)
-                profitReturnTime(historyRequest, 0.8)
+                histogramChartComparison(
+                    "dailyX" + historyRequest.ticker,
+                    "daily buy, sell with statistics", listOf(
+                        dailyInvestmentOutWithStats(historyRequest, 360, 60, 3.0),
+                        dailyInvestmentOutWithStats(historyRequest, 360, 180, 3.0)
+                    )
+                )
             }
         }
     }
@@ -64,9 +67,11 @@ class HtmlReportPrinter(
         val data = dailyInvestmentsProfitProcessor.values(candles)
 
         histogramChart(
-            historyRequest.ticker + "dailyProfit" + period,
-            "Daily Buy - $period days profits",
-            data
+            HistogramChartParams(
+                chartId = historyRequest.ticker + "dailyProfit" + period,
+                title = "Daily Buy - $period days profits",
+                data = data
+            )
         )
     }
 
@@ -78,30 +83,52 @@ class HtmlReportPrinter(
         val profitDaysProcessor = ProfitDaysProcessor(profit)
         val data = profitDaysProcessor.values(candles)
         histogramChart(
-            historyRequest.ticker + "dailyProfit" + profit,
-            "Profit return: $profit",
-            data
+            HistogramChartParams(
+                chartId = historyRequest.ticker + "dailyProfit" + profit,
+                title = "Profit return: $profit",
+                data = data
+            )
         )
     }
 
+    private fun dailyInvestmentOutWithStats(
+        historyRequest: HistoryRequest,
+        days: Long,
+        maxDaysAfter: Long,
+        deviationsBandwidth: Double
+    ): HistogramChartParams {
+        val candles = marketRepository.loadHistory(historyRequest)
+        val dailyInvestmentOutWithStats = DailyInvestmentOutWithStats(days, maxDaysAfter, deviationsBandwidth)
+        val data = dailyInvestmentOutWithStats.values(candles)
+
+        return HistogramChartParams(
+            chartId = historyRequest.ticker + "dailyInvestmentOutWithStats" + days + maxDaysAfter + deviationsBandwidth,
+            title = "$days + $maxDaysAfter, $deviationsBandwidth",
+            data = data
+        )
+    }
+
+    data class HistogramChartParams(
+        val chartId: String,
+        val title: String,
+        val data: List<Number>,
+        val color: String = Palette.blue,
+        val opacity: Double = 0.9
+    )
+
     private fun FlowContent.histogramChart(
-        chartId: String,
-        title: String,
-        data: List<Number>,
-        color: String = Palette.blue,
-        opacity: Double = 0.9
+        params: HistogramChartParams
     ) {
         div(classes = "chart-container") {
             div(classes = "chart") {
-                id = chartId
+                id = params.chartId
             }
             script {
                 unsafe {
                     raw(
                         """
-                        var x = [${data.joinToString(",")}];
                         var layout = {
-                          title: '$title',
+                          title: '${params.title}',
                           font: {
                             family: 'Trebuchet MS,roboto,ubuntu,sans-serif',
                             size: 12,
@@ -109,23 +136,21 @@ class HtmlReportPrinter(
                           }
                         };
     
-                        var trace = {
-                            x: x,
+                        var data = [{
+                            x: [${params.data.joinToString(",")}],
                             type: 'histogram',
-                            opacity: $opacity,
+                            opacity: ${params.opacity},
                             marker: {
-                             color: '$color',
+                             color: '${params.color}',
                             }
-                          };
-    
-                        var data = [trace];
-                        Plotly.newPlot('$chartId', data, layout);
+                          }];
+                        Plotly.newPlot('${params.chartId}', data, layout);
                     """.trimIndent()
                     )
                 }
             }
 
-            val descriptiveStatistics = data.descriptiveStatistics
+            val descriptiveStatistics = params.data.descriptiveStatistics
 
             val stats = listOf<Pair<String, Double>>(
                 "size" to descriptiveStatistics.size.toDouble(),
@@ -148,4 +173,104 @@ class HtmlReportPrinter(
             }
         }
     }
+
+    private fun FlowContent.histogramChartComparison(
+        chartId: String,
+        title: String,
+        params: List<HistogramChartParams>
+    ) {
+        div(classes = "chart-container") {
+            div(classes = "chart") {
+                id = chartId
+            }
+            script {
+                unsafe {
+                    raw(
+                        """
+                        var layout = {
+                          title: '${title}',
+                          barmode: "overlay",
+                          font: {
+                            family: 'Trebuchet MS,roboto,ubuntu,sans-serif',
+                            size: 12,
+                            color: '#787b86'
+                          }
+                        };
+    
+                        var data = [
+                        ${
+                            params.mapIndexed { index, it ->
+                                """{
+                            x: [${it.data.joinToString(",")}],
+                            type: 'histogram',
+                            opacity: ${1.0 / params.size},
+                            marker: {
+                             color: '${Palette.color(index)}',
+                            }
+                          }"""
+                            }.joinToString(",")
+                        }
+                        ];
+                        Plotly.newPlot('${chartId}', data, layout);
+                    """.trimIndent()
+                    )
+                }
+            }
+
+            val stats = params.map {
+                val descriptiveStatistics = it.data.descriptiveStatistics
+
+                StatsData(
+                    descriptiveStatistics.size.toDouble(),
+                    descriptiveStatistics.mean,
+                    descriptiveStatistics.percentile(5.0),
+                    descriptiveStatistics.percentile(95.0),
+                    descriptiveStatistics.standardDeviation,
+                    descriptiveStatistics.skewness,
+                    descriptiveStatistics.kurtosis,
+                )
+            }
+
+            val decimalFormat = DecimalFormat("#.##")
+
+            div(classes = "chart-summary") {
+                table {
+                    fun row(
+                        title: String,
+                        fields: List<Double>
+                    ) {
+                        tr {
+                            td { +title }
+                            fields.forEach { td { +decimalFormat.format(it) } }
+                        }
+                    }
+
+                    tr {
+                        td {}
+                        params.forEach {
+                            td { +it.title }
+                        }
+                    }
+
+                    row("size", stats.map { it.size })
+                    row("mean", stats.map { it.mean })
+                    row("percentile_5", stats.map { it.percentile_5 })
+                    row("percentile_95", stats.map { it.percentile_95 })
+                    row("standardDeviation", stats.map { it.standardDeviation })
+                    row("skewness", stats.map { it.skewness })
+                    row("kurtosis", stats.map { it.kurtosis })
+                }
+            }
+        }
+    }
 }
+
+data class StatsData(
+    val size: Double,
+    val mean: Double,
+    val percentile_5: Double,
+    val percentile_95: Double,
+    val standardDeviation: Double,
+    val skewness: Double,
+    val kurtosis: Double,
+)
