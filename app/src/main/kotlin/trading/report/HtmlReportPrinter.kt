@@ -3,6 +3,7 @@ package trading.report
 import kotlinx.html.FlowContent
 import kotlinx.html.body
 import kotlinx.html.div
+import kotlinx.html.h3
 import kotlinx.html.head
 import kotlinx.html.html
 import kotlinx.html.id
@@ -18,9 +19,26 @@ import org.nield.kotlinstatistics.descriptiveStatistics
 import trading.repository.HistoryRequest
 import trading.repository.MarketRepository
 import trading.statisics.DailyInvestmentOutWithStats
+import trading.statisics.DailyInvestmentsPortfolioProfitProcessor
 import trading.statisics.DailyInvestmentsProfitProcessor
+import trading.statisics.PFStrategy1
+import trading.statisics.PFStrategy2
+import trading.statisics.PFStrategy3
+import trading.statisics.PFStrategy4
+import trading.statisics.PortfolioFinder
 import trading.statisics.ProfitDaysProcessor
+import trading.statisics.TickerCandles
+import trading.strategy.MarketStrategy
+import trading.strategy.MarketStrategyHistoryTester
+import java.math.BigDecimal
 import java.text.DecimalFormat
+
+data class StrategyResult(
+    val profit: BigDecimal,
+    val name: String
+)
+
+private const val chartsFont = "Avenir Next"
 
 class HtmlReportPrinter(
     private val marketRepository: MarketRepository,
@@ -35,6 +53,7 @@ class HtmlReportPrinter(
                 script(src = "./js/plotly-latest.min.js") {}
             }
             body {
+                charts(requests)
                 requests.forEach { charts(it) }
             }
         }.toString()
@@ -46,32 +65,131 @@ class HtmlReportPrinter(
                 +historyRequest.ticker
             }
             div(classes = "charts-section") {
-                dailyProfit(historyRequest, 360)
-                histogramChartComparison(
+                // histogramChart(dailyProfit(historyRequest, 360))
+                // histogramChart(dailyProfit(historyRequest, 720))
+/*                compareStrategies(
+                    historyRequest,
+                    listOf(
+                        MonthlyBuyAndHoldForeverMarketStrategy(15)
+                    )
+                )*/
+                /*histogramChartComparison(
                     "dailyX" + historyRequest.ticker,
                     "daily buy, sell with statistics", listOf(
+                        dailyInvestmentOutWithStats(historyRequest, 360, 60, 1.0),
+                        dailyInvestmentOutWithStats(historyRequest, 360, 60, 2.0),
+                        dailyInvestmentOutWithStats(historyRequest, 360, 60, 2.5),
                         dailyInvestmentOutWithStats(historyRequest, 360, 60, 3.0),
-                        dailyInvestmentOutWithStats(historyRequest, 360, 180, 3.0)
+                    )
+                )*/
+                histogramChartComparison(
+                    "daily profits" + historyRequest.ticker,
+                    "daily", listOfNotNull(
+                        dailyProfit(historyRequest, 300),
+                        dailyProfit(historyRequest, 600),
+                        dailyProfit(historyRequest, 900),
+                        dailyProfit(historyRequest, 1200)
                     )
                 )
             }
         }
     }
 
-    private fun FlowContent.dailyProfit(
+    private fun FlowContent.charts(historyRequests: List<HistoryRequest>) {
+        div(classes = "ticket-section") {
+            div(classes = "header") {
+                +"Portfolios"
+            }
+            div(classes = "charts-section") {
+                val list1 = listOf("AAPL"/*, "TSLA"*/, "AMZN", "ADBE", "GOOG")
+                // histogramChart(dailyProfitPortfolio(historyRequests, 300))
+                histogramChart(dailyProfitPortfolio(historyRequests.filter { it.ticker in list1 }, 300))
+                // histogramChart(dailyProfitPortfolio(historyRequests.filter { it.ticker !in list1 }, 300))
+                histogramChart(bestPortfolioSet(historyRequests, PortfolioFinder(300, PFStrategy1())))
+                histogramChart(bestPortfolioSet(historyRequests, PortfolioFinder(300, PFStrategy2())))
+                histogramChart(bestPortfolioSet(historyRequests, PortfolioFinder(300, PFStrategy3())))
+                histogramChart(bestPortfolioSet(historyRequests, PortfolioFinder(300, PFStrategy4())))
+
+                /*histogramChartComparison(
+                    "portfolios",
+                    "portfolios",
+                    listOf(
+                        dailyProfitPortfolio(historyRequests, 300),
+                        dailyProfitPortfolio(historyRequests.filter { it.ticker in list1 }, 300),
+                        dailyProfitPortfolio(historyRequests.filter { it.ticker !in list1 }, 300)
+                    )
+                )*/
+            }
+        }
+    }
+
+    private fun FlowContent.compareStrategies(
         historyRequest: HistoryRequest,
-        period: Long
+        strategies: List<MarketStrategy>
     ) {
         val candles = marketRepository.loadHistory(historyRequest)
-        val dailyInvestmentsProfitProcessor = DailyInvestmentsProfitProcessor(period)
-        val data = dailyInvestmentsProfitProcessor.values(candles)
+        // todo async
+        val results = strategies.map { StrategyResult(MarketStrategyHistoryTester(it, candles).profit(), it.toString()) }
+        barsChart(
+            BarChartData(
+                chartId = historyRequest.ticker + "compareStrategies",
+                title = "Strategies",
+                data = results
+            )
+        )
+    }
 
-        histogramChart(
-            HistogramChartParams(
+    private fun dailyProfit(
+        historyRequest: HistoryRequest,
+        period: Long
+    ): HistogramChartParams? {
+        try {
+            val candles = marketRepository.loadHistory(historyRequest)
+            val dailyInvestmentsProfitProcessor = DailyInvestmentsProfitProcessor(period)
+            val data = dailyInvestmentsProfitProcessor.values(candles)
+
+            return HistogramChartParams(
                 chartId = historyRequest.ticker + "dailyProfit" + period,
-                title = "Daily Buy - $period days profits",
+                title = "$period",
                 data = data
             )
+        } catch (e: Exception) {
+            return null
+        }
+    }
+
+    private fun dailyProfitPortfolio(
+        historyRequests: List<HistoryRequest>,
+        period: Long
+    ): HistogramChartParams {
+
+        val candles = historyRequests.map { marketRepository.loadHistory(it) }
+        val dailyInvestmentsPortfolioProfitProcessor = DailyInvestmentsPortfolioProfitProcessor(period)
+        val data = dailyInvestmentsPortfolioProfitProcessor.values(candles.filter { it.size > period * 5 })
+
+        return HistogramChartParams(
+            chartId = historyRequests.joinToString("_") { it.ticker } + period,
+            title = historyRequests.joinToString("_") { it.ticker } + ", $period days",
+            data = data
+        )
+    }
+
+    private fun bestPortfolioSet(
+        historyRequests: List<HistoryRequest>,
+        portfolioFinder: PortfolioFinder
+    ): HistogramChartParams {
+        val period: Long = portfolioFinder.investmentPeriodDays
+
+        val candles = historyRequests.map { TickerCandles(it.ticker, marketRepository.loadHistory(it)) }
+        val data = portfolioFinder.findBestSet(candles.filter { it.candles.size > period * 5 })
+
+        val dailyInvestmentsPortfolioProfitProcessor = DailyInvestmentsPortfolioProfitProcessor(period)
+        val dataProfit = dailyInvestmentsPortfolioProfitProcessor.values(data.map { it.candles })
+
+        return HistogramChartParams(
+            chartId = data.joinToString("_") { it.ticker } + period,
+            title = data.joinToString(" ") { it.ticker } + ", $period days",
+            data = dataProfit
         )
     }
 
@@ -99,7 +217,7 @@ class HtmlReportPrinter(
     ): HistogramChartParams {
         val candles = marketRepository.loadHistory(historyRequest)
         val dailyInvestmentOutWithStats = DailyInvestmentOutWithStats(days, maxDaysAfter, deviationsBandwidth)
-        val data = dailyInvestmentOutWithStats.values(candles)
+        val data = dailyInvestmentOutWithStats.values(candles).map { it.periodDays }
 
         return HistogramChartParams(
             chartId = historyRequest.ticker + "dailyInvestmentOutWithStats" + days + maxDaysAfter + deviationsBandwidth,
@@ -120,6 +238,7 @@ class HtmlReportPrinter(
         params: HistogramChartParams
     ) {
         div(classes = "chart-container") {
+            h3 { +params.title }
             div(classes = "chart") {
                 id = params.chartId
             }
@@ -128,9 +247,8 @@ class HtmlReportPrinter(
                     raw(
                         """
                         var layout = {
-                          title: '${params.title}',
                           font: {
-                            family: 'Trebuchet MS,roboto,ubuntu,sans-serif',
+                            family: '$chartsFont',
                             size: 12,
                             color: '#787b86'
                           }
@@ -174,6 +292,39 @@ class HtmlReportPrinter(
         }
     }
 
+    data class BarChartData(
+        val chartId: String,
+        val title: String,
+        val data: List<StrategyResult>
+    )
+
+    private fun FlowContent.barsChart(
+        params: BarChartData
+    ) {
+        div(classes = "chart-container") {
+            div(classes = "chart") {
+                id = params.chartId
+            }
+            script {
+                unsafe {
+                    raw(
+                        """
+                        var data = [
+                          {
+                            x: [${params.data.joinToString(",") { "'${it.name}'" }}],
+                            y: [${params.data.joinToString(",") { it.profit.toString() }}],
+                            type: 'bar'
+                          }
+                        ];
+                        
+                        Plotly.newPlot('${params.chartId}', data);
+                    """.trimIndent()
+                    )
+                }
+            }
+        }
+    }
+
     private fun FlowContent.histogramChartComparison(
         chartId: String,
         title: String,
@@ -191,7 +342,7 @@ class HtmlReportPrinter(
                           title: '${title}',
                           barmode: "overlay",
                           font: {
-                            family: 'Trebuchet MS,roboto,ubuntu,sans-serif',
+                            family: '$chartsFont',
                             size: 12,
                             color: '#787b86'
                           }

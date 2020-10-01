@@ -24,10 +24,60 @@ class App(
 
         val marketRepository: MarketRepository = app.koin.get()
 
+        val tickers = listOf(
+            "AAPL",
+            "GOOG",
+            "AMZN",
+            "ADBE",
+            "INTC",
+            "TSLA",
+            "XOM",
+            "CVX",
+            "COP",
+            "VLO",
+            "EOG",
+            "TCS",
+            "NFLX",
+            "MSFT",
+            "FB",
+            "TWTR",
+            "V",
+            "SQ",
+            "MA",
+            "AMD",
+            "F",
+            "FDX",
+            "ADSK",
+            "AVGO",
+            "BABA",
+            "BIDU",
+            "EBAY",
+            "EPAM",
+            "NVDA",
+            "PYPL",
+            "QIWI",
+            "YNDX",
+        ).distinct()
+
+        val requestss = tickers.map {
+            HistoryRequest(
+                ticker = it,
+                from = OffsetDateTime.parse("2010-01-01T10:15:30+01:00"),
+                to = OffsetDateTime.parse("2019-01-01T10:15:30+01:00"),
+                interval = CandleInterval.DAY
+            )
+        }
+
         val requests = listOf(
             HistoryRequest(
                 ticker = "AAPL",
                 from = OffsetDateTime.parse("2009-01-01T10:15:30+01:00"),
+                to = OffsetDateTime.parse("2019-01-01T10:15:30+01:00"),
+                interval = CandleInterval.DAY
+            ),
+            HistoryRequest(
+                ticker = "GOOG",
+                from = OffsetDateTime.parse("2015-01-01T10:15:30+01:00"),
                 to = OffsetDateTime.parse("2019-01-01T10:15:30+01:00"),
                 interval = CandleInterval.DAY
             ),
@@ -48,12 +98,49 @@ class App(
                 from = OffsetDateTime.parse("2002-01-01T10:15:30+01:00"),
                 to = OffsetDateTime.parse("2019-01-01T10:15:30+01:00"),
                 interval = CandleInterval.DAY
+            ),
+            HistoryRequest(
+                ticker = "TSLA",
+                from = OffsetDateTime.parse("2011-01-01T10:15:30+01:00"),
+                to = OffsetDateTime.parse("2019-01-01T10:15:30+01:00"),
+                interval = CandleInterval.DAY
+            ),
+            HistoryRequest(
+                ticker = "XOM",
+                from = OffsetDateTime.parse("1980-01-01T10:15:30+01:00"),
+                to = OffsetDateTime.parse("2019-01-01T10:15:30+01:00"),
+                interval = CandleInterval.DAY
+            ),
+            HistoryRequest(
+                ticker = "CVX",
+                from = OffsetDateTime.parse("1980-01-01T10:15:30+01:00"),
+                to = OffsetDateTime.parse("2019-01-01T10:15:30+01:00"),
+                interval = CandleInterval.DAY
+            ),
+            HistoryRequest(
+                ticker = "COP",
+                from = OffsetDateTime.parse("1980-01-01T10:15:30+01:00"),
+                to = OffsetDateTime.parse("2019-01-01T10:15:30+01:00"),
+                interval = CandleInterval.DAY
+            ),
+            HistoryRequest(
+                ticker = "EOG",
+                from = OffsetDateTime.parse("1980-01-01T10:15:30+01:00"),
+                to = OffsetDateTime.parse("2019-01-01T10:15:30+01:00"),
+                interval = CandleInterval.DAY
+            ),
+            HistoryRequest(
+                ticker = "VLO",
+                from = OffsetDateTime.parse("1987-01-01T10:15:30+01:00"),
+                to = OffsetDateTime.parse("2019-01-01T10:15:30+01:00"),
+                interval = CandleInterval.DAY
             )
         )
+
         val t = measureTimeMillis {
             val html = HtmlReportPrinter(
                 marketRepository = marketRepository,
-                requests = requests
+                requests = requestss
             ).html()
             ReportPrinter(Config.reportDir).print(html)
         }

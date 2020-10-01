@@ -7,9 +7,11 @@ object Palette {
     const val green = "#009800"
 
     val colors = listOf(
-        blue,
-        orange,
-        green
+        "#D62626",
+        "#2BBB53",
+        "#3CC4E1",
+        "#990DBC",
+        "#CA4795"
     )
 
     fun color(index: Int) = colors[index % colors.size]

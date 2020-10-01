@@ -8,21 +8,31 @@ import java.lang.Integer.max
 import java.math.BigDecimal
 import java.time.Duration
 
+data class InvestStats(
+    val periodDays: Int,
+    val profit: BigDecimal
+)
+
+data class Stat(
+    val mean: Double,
+    val standardDeviation: Double
+)
+
 class DailyInvestmentOutWithStats(
     private val investmentPeriodDays: Long,
     private val maxDaysAfter: Long,
     private val deviationsBandwidth: Double
-) : DistributionProcessor<BigDecimal> {
+) {
 
-    override fun values(
+    fun values(
         history: List<Candle>,
-        start: Int,
-        end: Int
-    ): List<BigDecimal> {
+        start: Int = 0,
+        end: Int = history.size - 1
+    ): List<InvestStats> {
 
         val processor = DailyInvestmentsProfitProcessor(investmentPeriodDays)
 
-        val values = mutableListOf<BigDecimal>()
+        val values = mutableListOf<InvestStats>()
 
         val latestTime = history[end].time.minusDays(investmentPeriodDays + maxDaysAfter + 1)
         val lastIndex = history.firstAfter(start, end) { !it.time.isBefore(latestTime) }
@@ -43,7 +53,12 @@ class DailyInvestmentOutWithStats(
             while (j < end - 1 && !conditions(history, i, j, stats[j])) {
                 j++
             }
-            values.add(history[j].highestPrice / buyPrice)
+            values.add(
+                InvestStats(
+                    Duration.between(history[i].time, history[j].time).toDays().toInt(),
+                    history[j].highestPrice / buyPrice
+                )
+            )
         }
 
         return values
@@ -60,12 +75,8 @@ class DailyInvestmentOutWithStats(
 
         if (duration < investmentPeriodDays && profit > stat.mean + stat.standardDeviation * deviationsBandwidth) return true
         if (duration > investmentPeriodDays && duration < investmentPeriodDays + maxDaysAfter && profit < stat.mean - stat.standardDeviation * deviationsBandwidth) return true
+        if (duration > investmentPeriodDays + maxDaysAfter) return true
 
         return false
     }
 }
-
-data class Stat(
-    val mean: Double,
-    val standardDeviation: Double
-)
