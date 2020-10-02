@@ -21,8 +21,15 @@ body {
 
 .header {
   font-size: 30px;
-  margin-left: 1em;
+  margin-left: 16px;
   font-family: Publico Headline;
+}
+
+.header-summary {
+  font-size: 20px;
+  font-weight: 300;
+  margin-left: 16px;
+  font-family: Avenir Next;
 }
 
 .chart-summary {

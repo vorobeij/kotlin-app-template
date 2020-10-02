@@ -16,22 +16,28 @@ import kotlinx.html.title
 import kotlinx.html.tr
 import kotlinx.html.unsafe
 import org.nield.kotlinstatistics.descriptiveStatistics
+import ru.tinkoff.invest.openapi.models.market.CandleInterval
+import trading.infrastructure.logger
 import trading.repository.HistoryRequest
 import trading.repository.MarketRepository
 import trading.statisics.DailyInvestmentOutWithStats
 import trading.statisics.DailyInvestmentsPortfolioProfitProcessor
 import trading.statisics.DailyInvestmentsProfitProcessor
-import trading.statisics.PFStrategy1
-import trading.statisics.PFStrategy2
-import trading.statisics.PFStrategy3
+import trading.statisics.IPortfolioFinder
 import trading.statisics.PFStrategy4
 import trading.statisics.PortfolioFinder
+import trading.statisics.PortfolioProfitProcessor
+import trading.statisics.PortfolioProfitsChartFinder
+import trading.statisics.PortfolioProfitsChartMaxProfitStrategy
 import trading.statisics.ProfitDaysProcessor
 import trading.statisics.TickerCandles
 import trading.strategy.MarketStrategy
 import trading.strategy.MarketStrategyHistoryTester
 import java.math.BigDecimal
+import java.math.MathContext
 import java.text.DecimalFormat
+import java.time.OffsetDateTime
+import java.util.UUID
 
 data class StrategyResult(
     val profit: BigDecimal,
@@ -42,7 +48,7 @@ private const val chartsFont = "Avenir Next"
 
 class HtmlReportPrinter(
     private val marketRepository: MarketRepository,
-    private val requests: List<HistoryRequest>
+    private val tickers: List<String>
 ) {
 
     fun html(): String {
@@ -53,8 +59,61 @@ class HtmlReportPrinter(
                 script(src = "./js/plotly-latest.min.js") {}
             }
             body {
-                charts(requests)
-                requests.forEach { charts(it) }
+                portfolioSet(
+                    listOf("ADBE", "AVGO", "MA", "NFLX", "NVDA", "V", "VLO"),
+                    period = 300,
+                    from = OffsetDateTime.parse("2010-01-01T10:15:30+01:00"),
+                    to = OffsetDateTime.parse("2020-01-01T10:15:30+01:00"),
+                )
+                /*
+        portfolioSet(
+            listOf("ADBE", *//*"AMZN",*//* "AVGO", "MA", "NFLX", "NVDA", *//*"TSLA",*//* "V"),
+                    period = 300,
+                    from = OffsetDateTime.parse("2010-01-01T10:15:30+01:00"),
+                    to = OffsetDateTime.parse("2018-01-01T10:15:30+01:00"),
+                )
+                portfolioSet(
+                    listOf("ADBE", *//*"AMZN",*//* "AVGO", "MA", "NFLX", "NVDA", *//*"TSLA",*//* "V"),
+                    period = 300,
+                    from = OffsetDateTime.parse("2010-01-01T10:15:30+01:00"),
+                    to = OffsetDateTime.parse("2020-01-01T10:15:30+01:00"),
+                )
+                portfolioSet(
+                    listOf("AAPL","ADBE","AVGO","MA","NFLX","NVDA","TSLA","V"),
+                    period = 300,
+                    from = OffsetDateTime.parse("2010-01-01T10:15:30+01:00"),
+                    to = OffsetDateTime.parse("2020-01-01T10:15:30+01:00"),
+                )
+                portfolioSet(
+                    listOf("ADBE", "AVGO", "MA", "NFLX", "NVDA", "TSLA", "V"),
+                    period = 300,
+                    from = OffsetDateTime.parse("2010-01-01T10:15:30+01:00"),
+                    to = OffsetDateTime.parse("2018-01-01T10:15:30+01:00"),
+                )
+                portfolioSet(
+                    listOf("AAPL", "ADBE", "AVGO", "EBAY", "MA", "MSFT", "NVDA", "V", "VLO"),
+                    period = 300,
+                    from = OffsetDateTime.parse("2010-01-01T10:15:30+01:00"),
+                    to = OffsetDateTime.parse("2018-01-01T10:15:30+01:00"),
+                )*/
+
+                charts(tickers.map {
+                    HistoryRequest(
+                        ticker = it,
+                        from = OffsetDateTime.parse("2010-01-01T10:15:30+01:00"),
+                        to = OffsetDateTime.parse("2018-01-01T10:15:30+01:00"),
+                        interval = CandleInterval.DAY
+                    )
+                })
+                /*charts(tickers.map {
+                    HistoryRequest(
+                        ticker = it,
+                        from = OffsetDateTime.parse("2010-01-01T10:15:30+01:00"),
+                        to = OffsetDateTime.parse("2020-01-01T10:15:30+01:00"),
+                        interval = CandleInterval.DAY
+                    )
+                })*/
+                // requests.forEach { charts(it) }
             }
         }.toString()
     }
@@ -96,31 +155,15 @@ class HtmlReportPrinter(
     }
 
     private fun FlowContent.charts(historyRequests: List<HistoryRequest>) {
-        div(classes = "ticket-section") {
-            div(classes = "header") {
-                +"Portfolios"
-            }
-            div(classes = "charts-section") {
-                val list1 = listOf("AAPL"/*, "TSLA"*/, "AMZN", "ADBE", "GOOG")
-                // histogramChart(dailyProfitPortfolio(historyRequests, 300))
-                histogramChart(dailyProfitPortfolio(historyRequests.filter { it.ticker in list1 }, 300))
-                // histogramChart(dailyProfitPortfolio(historyRequests.filter { it.ticker !in list1 }, 300))
-                histogramChart(bestPortfolioSet(historyRequests, PortfolioFinder(300, PFStrategy1())))
-                histogramChart(bestPortfolioSet(historyRequests, PortfolioFinder(300, PFStrategy2())))
-                histogramChart(bestPortfolioSet(historyRequests, PortfolioFinder(300, PFStrategy3())))
-                histogramChart(bestPortfolioSet(historyRequests, PortfolioFinder(300, PFStrategy4())))
-
-                /*histogramChartComparison(
-                    "portfolios",
-                    "portfolios",
-                    listOf(
-                        dailyProfitPortfolio(historyRequests, 300),
-                        dailyProfitPortfolio(historyRequests.filter { it.ticker in list1 }, 300),
-                        dailyProfitPortfolio(historyRequests.filter { it.ticker !in list1 }, 300)
-                    )
-                )*/
-            }
-        }
+        // bestPortfolioSet(historyRequests, PortfolioFinder(300, PFStrategy1()), 300)
+        bestPortfolioSet(historyRequests, PortfolioFinder(300, PFStrategy4()), 300)
+        // bestPortfolioSet(historyRequests, PortfolioFinder2(PFStrategy1()), 300)
+        // bestPortfolioSet(historyRequests, PortfolioFinder(300, PFStrategy1()), 300) // better
+        // bestPortfolioSet(historyRequests, PortfolioFinder2(PFStrategy2()), 300)
+        // bestPortfolioSet(historyRequests, PortfolioFinder(300, PFStrategy2()), 300) // better
+        // bestPortfolioSet(historyRequests, PortfolioFinder2(PFStrategy5()), 300)
+        // bestPortfolioSet(historyRequests, PortfolioFinder(300, PFStrategy2()), 300)
+        bestPortfolioSet(historyRequests, PortfolioProfitsChartFinder(PortfolioProfitsChartMaxProfitStrategy()), 300)
     }
 
     private fun FlowContent.compareStrategies(
@@ -174,23 +217,89 @@ class HtmlReportPrinter(
         )
     }
 
-    private fun bestPortfolioSet(
+    data class TickerPrice(
+        val ticker: String,
+        val price: BigDecimal,
+        val lots: Int
+    )
+
+    private fun FlowContent.portfolioSet(
+        tickers: List<String>,
+        period: Long,
+        from: OffsetDateTime,
+        to: OffsetDateTime
+    ) {
+        val data = tickers.map { TickerCandles(it, marketRepository.loadHistory(HistoryRequest(it, from, to, CandleInterval.DAY))) }
+        val dailyInvestmentsPortfolioProfitProcessor = DailyInvestmentsPortfolioProfitProcessor(period)
+        val dataProfit: List<BigDecimal> = dailyInvestmentsPortfolioProfitProcessor.values(data.map { it.candles })
+
+        val title = data.joinToString(",") { "\"${it.ticker}\"" }
+
+        var tickerPrices = tickers.map { TickerPrice(it, marketRepository.getTickerCurrentPrice(it), 0) }
+        val prices = tickerPrices.map { it.price }
+        val max = prices.descriptiveStatistics.max
+        tickerPrices = tickerPrices.map {
+            it.copy(lots = (max / it.price.toDouble()).toInt())
+        }
+
+        div(classes = "ticket-section") {
+            div(classes = "header") {
+                +title
+            }
+            div(classes = "header-summary") {
+                +"$from - $to"
+            }
+            div(classes = "charts-section") {
+                histogramChart(
+                    HistogramChartParams(
+                        chartId = UUID.randomUUID().toString(),
+                        title = "",
+                        data = dataProfit
+                    )
+                )
+                lineChart(
+                    chartId = UUID.randomUUID().toString(),
+                    title = "",
+                    data = PortfolioProfitProcessor().values(data)
+                )
+                div(classes = "header-summary") {
+                    table {
+                        tickerPrices.forEach {
+                            tr {
+                                td { +it.ticker }
+                                td { +"${it.price}\$" }
+                                td { +"${it.lots}" }
+                            }
+                        }
+                        tr {
+                            td { +"ideal price:" }
+                            td { +"${BigDecimal(max * tickers.size, MathContext(2))}\$" }
+                        }
+                        tr {
+                            td { +"price:" }
+                            td {
+                                +"${tickerPrices.sumOf { it.price * BigDecimal(it.lots) }}\$"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun FlowContent.bestPortfolioSet(
         historyRequests: List<HistoryRequest>,
-        portfolioFinder: PortfolioFinder
-    ): HistogramChartParams {
-        val period: Long = portfolioFinder.investmentPeriodDays
+        portfolioFinder: IPortfolioFinder,
+        period: Long
+    ) {
 
         val candles = historyRequests.map { TickerCandles(it.ticker, marketRepository.loadHistory(it)) }
-        val data = portfolioFinder.findBestSet(candles.filter { it.candles.size > period * 5 })
-
-        val dailyInvestmentsPortfolioProfitProcessor = DailyInvestmentsPortfolioProfitProcessor(period)
-        val dataProfit = dailyInvestmentsPortfolioProfitProcessor.values(data.map { it.candles })
-
-        return HistogramChartParams(
-            chartId = data.joinToString("_") { it.ticker } + period,
-            title = data.joinToString(" ") { it.ticker } + ", $period days",
-            data = dataProfit
-        )
+        val data: List<TickerCandles> = portfolioFinder.findBestSet(candles.filter { it.candles.size > period * 5 })
+        if (data.isNotEmpty()) {
+            portfolioSet(data.map { it.ticker }, period, historyRequests.first().from, historyRequests.first().to)
+        } else {
+            logger.info("best portfolio set is empty")
+        }
     }
 
     private fun FlowContent.profitReturnTime(
@@ -225,14 +334,6 @@ class HtmlReportPrinter(
             data = data
         )
     }
-
-    data class HistogramChartParams(
-        val chartId: String,
-        val title: String,
-        val data: List<Number>,
-        val color: String = Palette.blue,
-        val opacity: Double = 0.9
-    )
 
     private fun FlowContent.histogramChart(
         params: HistogramChartParams
@@ -292,12 +393,6 @@ class HtmlReportPrinter(
         }
     }
 
-    data class BarChartData(
-        val chartId: String,
-        val title: String,
-        val data: List<StrategyResult>
-    )
-
     private fun FlowContent.barsChart(
         params: BarChartData
     ) {
@@ -320,6 +415,53 @@ class HtmlReportPrinter(
                         Plotly.newPlot('${params.chartId}', data);
                     """.trimIndent()
                     )
+                }
+            }
+        }
+    }
+
+    private fun FlowContent.lineChart(
+        chartId: String,
+        title: String,
+        data: List<LineChartPoint>
+    ) {
+        div(classes = "chart-container") {
+            h3 { +title }
+            div(classes = "chart") {
+                id = chartId
+            }
+            script {
+                unsafe {
+                    raw(
+                        """
+                        var trace1 = {
+                          x: [${data.joinToString(",") { it.x.toString() }}],
+                          y: [${data.joinToString(",") { it.y.toString() }}],
+                          type: 'scatter',
+                          line: {
+                            width: 1
+                          }
+                        };
+                        
+                        var data = [trace1];
+                        
+                        Plotly.newPlot('$chartId', data);
+                    """.trimIndent()
+                    )
+                }
+            }
+            val d = data.map { it.y }.descriptiveStatistics
+            val stats = listOf(
+                "max" to d.max
+            )
+            div(classes = "chart-summary") {
+                table {
+                    stats.forEach {
+                        tr {
+                            td { +it.first }
+                            td { +DecimalFormat("#.##").format(it.second) }
+                        }
+                    }
                 }
             }
         }
@@ -353,6 +495,7 @@ class HtmlReportPrinter(
                             params.mapIndexed { index, it ->
                                 """{
                             x: [${it.data.joinToString(",")}],
+                            name:"${it.title}",
                             type: 'histogram',
                             opacity: ${1.0 / params.size},
                             marker: {
@@ -416,6 +559,17 @@ class HtmlReportPrinter(
     }
 }
 
+data class LineChartPoint(
+    val x: Int,
+    val y: BigDecimal,
+)
+
+data class BarChartData(
+    val chartId: String,
+    val title: String,
+    val data: List<StrategyResult>
+)
+
 data class StatsData(
     val size: Double,
     val mean: Double,
@@ -424,4 +578,12 @@ data class StatsData(
     val standardDeviation: Double,
     val skewness: Double,
     val kurtosis: Double,
+)
+
+data class HistogramChartParams(
+    val chartId: String,
+    val title: String,
+    val data: List<Number>,
+    val color: String = Palette.blue,
+    val opacity: Double = 0.9
 )

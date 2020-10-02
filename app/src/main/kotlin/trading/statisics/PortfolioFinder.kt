@@ -4,16 +4,16 @@ import org.nield.kotlinstatistics.Descriptives
 import org.nield.kotlinstatistics.descriptiveStatistics
 
 class PortfolioFinder(
-    val investmentPeriodDays: Long,
+    investmentPeriodDays: Long,
     private val strategy: PFStrategy
-) {
+) : IPortfolioFinder {
 
     private val processor = DailyInvestmentsPortfolioProfitProcessor(investmentPeriodDays)
 
-    fun findBestSet(candles: List<TickerCandles>): List<TickerCandles> {
+    override fun findBestSet(candles: List<TickerCandles>): List<TickerCandles> {
         val goodStocks = mutableListOf<TickerCandles>()
         // 1 get stats for a given set:
-        val givenSetStats = processor.values(candles.map { it.candles }).descriptiveStatistics
+        val givenSetStats = candles.descripts()
         val removedStocks = mutableListOf<TickerCandles>()
 
         while (removedStocks.size != candles.size) {
@@ -23,20 +23,22 @@ class PortfolioFinder(
             removedStocks.add(toRemove)
 
             // get metrics and compare with given set numbers
-            val newStats = processor.values(newCandles.map { it.candles }).descriptiveStatistics
-            if (strategy.isGood(givenSetStats, newStats)) {
+            val newStats = newCandles.descripts()
+            if (strategy.isGivenPerformBetterNew(givenSetStats, newStats)) {
                 goodStocks.add(toRemove)
             }
 
             newCandles.add(toRemove)
         }
-        return goodStocks
+        return goodStocks.sortedBy { it.ticker }
     }
+
+    private fun List<TickerCandles>.descripts() = processor.values(this.map { it.candles }).descriptiveStatistics
 }
 
 interface PFStrategy {
 
-    fun isGood(
+    fun isGivenPerformBetterNew(
         givenStats: Descriptives,
         newStats: Descriptives
     ): Boolean
@@ -44,7 +46,7 @@ interface PFStrategy {
 
 class PFStrategy1 : PFStrategy {
 
-    override fun isGood(
+    override fun isGivenPerformBetterNew(
         givenStats: Descriptives,
         newStats: Descriptives
     ): Boolean {
@@ -54,7 +56,7 @@ class PFStrategy1 : PFStrategy {
 
 class PFStrategy2 : PFStrategy {
 
-    override fun isGood(
+    override fun isGivenPerformBetterNew(
         givenStats: Descriptives,
         newStats: Descriptives
     ): Boolean {
@@ -66,7 +68,7 @@ class PFStrategy2 : PFStrategy {
 
 class PFStrategy3 : PFStrategy {
 
-    override fun isGood(
+    override fun isGivenPerformBetterNew(
         givenStats: Descriptives,
         newStats: Descriptives
     ): Boolean {
@@ -77,10 +79,21 @@ class PFStrategy3 : PFStrategy {
 
 class PFStrategy4 : PFStrategy {
 
-    override fun isGood(
+    override fun isGivenPerformBetterNew(
         givenStats: Descriptives,
         newStats: Descriptives
     ): Boolean {
         return newStats.mean < givenStats.mean
+            && newStats.percentile(5.0) < givenStats.percentile(5.0)
+    }
+}
+
+class PFStrategy5 : PFStrategy {
+
+    override fun isGivenPerformBetterNew(
+        givenStats: Descriptives,
+        newStats: Descriptives
+    ): Boolean {
+        return newStats.skewness < givenStats.skewness || newStats.percentile(5.0) < givenStats.percentile(5.0)
     }
 }

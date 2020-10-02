@@ -8,6 +8,7 @@ import ru.tinkoff.invest.openapi.models.market.Instrument
 import trading.infrastructure.logger
 import trading.infrastructure.splitTimeIntervalByYears
 import trading.repository.HistoryRequest
+import java.math.BigDecimal
 import java.time.OffsetDateTime
 import java.util.Optional
 
@@ -24,8 +25,13 @@ class MarketApiImpl(
         return loadHistoryFull(instrument, request.from, request.to, request.interval).candles
     }
 
+    private val instruments = mutableMapOf<String, Instrument>()
+
     override fun getInstrument(ticker: String): Instrument {
+        val cached = instruments[ticker]
+        if (cached != null) return cached
         logger.info("Searching by ticker $ticker... ")
+
         val instrumentOpt: Optional<Instrument> = api.marketContext.searchMarketInstrumentsByTicker(ticker)
             .join()
             .instruments
@@ -35,8 +41,13 @@ class MarketApiImpl(
         return if (instrumentOpt.isEmpty) {
             error("This ticker is not found")
         } else {
+            instruments[ticker] = instrumentOpt.get()
             instrumentOpt.get()
         }
+    }
+
+    override fun getTickerCurrentPrice(ticker: String): BigDecimal {
+        return loadHistory(HistoryRequest(ticker, OffsetDateTime.now().minusDays(20), OffsetDateTime.now(), CandleInterval.DAY)).last().closePrice
     }
 
     private fun loadHistoryFull(
