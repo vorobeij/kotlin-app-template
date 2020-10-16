@@ -9,6 +9,6 @@ class PortfolioProfitsChartMaxProfitStrategy : PortfolioProfitsChartStrategy {
         old: List<LineChartPoint>,
         new: List<LineChartPoint>
     ): Boolean {
-        return old.map { it.y }.descriptiveStatistics.max < new.map { it.y }.descriptiveStatistics.max
+        return old.maxOf { it.y } < new.maxOf { it.y }
     }
 }

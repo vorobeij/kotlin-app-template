@@ -7,6 +7,7 @@ class PortfolioFinder2(
 ) : IPortfolioFinder {
 
     private val processor = DailyInvestmentsPortfolioProfitProcessor(300)
+    private fun List<TickerCandles>.descripts() = processor.values(this.map { it.candles }).descriptiveStatistics
 
     override fun findBestSet(candles: List<TickerCandles>): List<TickerCandles> {
         val resultSet = mutableListOf<TickerCandles>()
@@ -35,6 +36,5 @@ class PortfolioFinder2(
         return resultSet
     }
 
-    private fun List<TickerCandles>.descripts() = processor.values(this.map { it.candles }).descriptiveStatistics
 }
 

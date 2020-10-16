@@ -1,25 +1,28 @@
 package trading.statisics
 
+import org.nield.kotlinstatistics.descriptiveStatistics
+import org.nield.kotlinstatistics.simpleRegression
 import trading.infrastructure.CombinationsProcessor
 import trading.infrastructure.SubsetProcessor
 
-class PortfolioFinder3(
-    private val strategy: PortfolioProfitsChartStrategy,
+class PortfolioFinder4(
+    private val strategy: PFStrategy,
     private val k: Int
 ) : IPortfolioFinder {
 
-    private val processor = PortfolioProfitProcessor()
+    private val processor = DailyInvestmentsPortfolioProfitProcessor(300)
+    private fun List<TickerCandles>.descripts() = processor.values(this.map { it.candles }).descriptiveStatistics
 
     override fun findBestSet(candles: List<TickerCandles>): List<TickerCandles> {
 
         val res = SubsetProcessor().process(
             candles,
-            k + 5,
+            k * 2,
             k
         ) { first: List<TickerCandles>, other: List<TickerCandles> ->
 
             var sett = first
-            var currentProfitsChart = processor.values(sett)
+            var currentDescripts = sett.descripts()
             var counter = 0
 
             val sum = mutableListOf<TickerCandles>().apply {
@@ -28,9 +31,9 @@ class PortfolioFinder3(
             }
 
             CombinationsProcessor().process(sum, k) { set ->
-                val newSetProfitsChart = processor.values(set)
-                if (strategy.isBetter(currentProfitsChart, newSetProfitsChart)) {
-                    currentProfitsChart = newSetProfitsChart
+                val newDescripts = set.descripts()
+                if (strategy.isGivenPerformBetterNew(newDescripts, currentDescripts)) {
+                    currentDescripts = newDescripts
                     sett = set
                     println(
                         "new set is better: ${

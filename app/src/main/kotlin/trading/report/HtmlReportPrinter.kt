@@ -24,10 +24,11 @@ import trading.statisics.DailyInvestmentOutWithStats
 import trading.statisics.DailyInvestmentsPortfolioProfitProcessor
 import trading.statisics.DailyInvestmentsProfitProcessor
 import trading.statisics.IPortfolioFinder
+import trading.statisics.PFStrategy1
 import trading.statisics.PFStrategy4
-import trading.statisics.PortfolioFinder
+import trading.statisics.PortfolioFinder3
+import trading.statisics.PortfolioFinder4
 import trading.statisics.PortfolioProfitProcessor
-import trading.statisics.PortfolioProfitsChartFinder
 import trading.statisics.PortfolioProfitsChartMaxProfitStrategy
 import trading.statisics.ProfitDaysProcessor
 import trading.statisics.TickerCandles
@@ -59,12 +60,18 @@ class HtmlReportPrinter(
                 script(src = "./js/plotly-latest.min.js") {}
             }
             body {
-                portfolioSet(
-                    listOf("ADBE", "AVGO", "MA", "NFLX", "NVDA", "V", "VLO"),
+                /*portfolioSet(
+                    listOf(*//*"ADBE", "AVGO", *//*"MA", "NFLX", "NVDA", "V", "VLO"),
                     period = 300,
                     from = OffsetDateTime.parse("2010-01-01T10:15:30+01:00"),
-                    to = OffsetDateTime.parse("2020-01-01T10:15:30+01:00"),
+                    to = OffsetDateTime.parse("2018-01-01T10:15:30+01:00"),
                 )
+                portfolioSet(
+                    listOf("BIDU","ADSK","AAXN","AVGO","AAPL"),
+                    period = 300,
+                    from = OffsetDateTime.parse("2010-01-01T10:15:30+01:00"),
+                    to = OffsetDateTime.parse("2018-01-01T10:15:30+01:00"),
+                )*/
                 /*
         portfolioSet(
             listOf("ADBE", *//*"AMZN",*//* "AVGO", "MA", "NFLX", "NVDA", *//*"TSLA",*//* "V"),
@@ -90,29 +97,48 @@ class HtmlReportPrinter(
                     from = OffsetDateTime.parse("2010-01-01T10:15:30+01:00"),
                     to = OffsetDateTime.parse("2018-01-01T10:15:30+01:00"),
                 )
-                portfolioSet(
-                    listOf("AAPL", "ADBE", "AVGO", "EBAY", "MA", "MSFT", "NVDA", "V", "VLO"),
-                    period = 300,
-                    from = OffsetDateTime.parse("2010-01-01T10:15:30+01:00"),
-                    to = OffsetDateTime.parse("2018-01-01T10:15:30+01:00"),
-                )*/
 
-                charts(tickers.map {
+                */
+
+                /*charts(tickers.map {
                     HistoryRequest(
                         ticker = it,
                         from = OffsetDateTime.parse("2010-01-01T10:15:30+01:00"),
                         to = OffsetDateTime.parse("2018-01-01T10:15:30+01:00"),
                         interval = CandleInterval.DAY
                     )
-                })
-                /*charts(tickers.map {
+                })*/
+
+                // portfolioSet(
+                //     listOf("MA","SBUX","ADBE","PYPL"),
+                //     period = 300,
+                //     from = OffsetDateTime.parse("2010-01-01T10:15:30+01:00"),
+                //     to = OffsetDateTime.parse("2015-01-01T10:15:30+01:00"),
+                // )
+
+                /*portfolioSet(
+                    listOf("ADBE", "AVGO", "MA", "NFLX", "NVDA", *//*"V", "VLO"*//*),
+                    period = 300,
+                        from = OffsetDateTime.parse("2017-01-01T10:15:30+01:00"),
+                        to = OffsetDateTime.parse("2020-01-01T10:15:30+01:00"),
+                    )
+                portfolioSet(
+                    listOf("MA","SBUX","ADBE","PYPL", "BA", "UAL", "EPAM"),
+                    period = 300,
+                    from = OffsetDateTime.parse("2017-01-01T10:15:30+01:00"),
+                    to = OffsetDateTime.parse("2019-01-01T10:15:30+01:00"),
+                )*/
+
+
+                charts(tickers.map {
                     HistoryRequest(
                         ticker = it,
-                        from = OffsetDateTime.parse("2010-01-01T10:15:30+01:00"),
-                        to = OffsetDateTime.parse("2020-01-01T10:15:30+01:00"),
+                        from = OffsetDateTime.parse("2015-01-01T10:15:30+01:00"),
+                        to = OffsetDateTime.parse("2019-01-01T10:15:30+01:00"),
                         interval = CandleInterval.DAY
                     )
-                })*/
+                })
+
                 // requests.forEach { charts(it) }
             }
         }.toString()
@@ -155,15 +181,11 @@ class HtmlReportPrinter(
     }
 
     private fun FlowContent.charts(historyRequests: List<HistoryRequest>) {
-        // bestPortfolioSet(historyRequests, PortfolioFinder(300, PFStrategy1()), 300)
-        bestPortfolioSet(historyRequests, PortfolioFinder(300, PFStrategy4()), 300)
-        // bestPortfolioSet(historyRequests, PortfolioFinder2(PFStrategy1()), 300)
-        // bestPortfolioSet(historyRequests, PortfolioFinder(300, PFStrategy1()), 300) // better
-        // bestPortfolioSet(historyRequests, PortfolioFinder2(PFStrategy2()), 300)
-        // bestPortfolioSet(historyRequests, PortfolioFinder(300, PFStrategy2()), 300) // better
-        // bestPortfolioSet(historyRequests, PortfolioFinder2(PFStrategy5()), 300)
-        // bestPortfolioSet(historyRequests, PortfolioFinder(300, PFStrategy2()), 300)
-        bestPortfolioSet(historyRequests, PortfolioProfitsChartFinder(PortfolioProfitsChartMaxProfitStrategy()), 300)
+        bestPortfolioSet(historyRequests, PortfolioFinder4(strategy = PFStrategy1(), k = 5), 300)
+        bestPortfolioSet(historyRequests, PortfolioFinder4(strategy = PFStrategy4(), k = 5), 300)
+        bestPortfolioSet(historyRequests, PortfolioFinder3(strategy = PortfolioProfitsChartMaxProfitStrategy(), k = 3), 300)
+        bestPortfolioSet(historyRequests, PortfolioFinder3(strategy = PortfolioProfitsChartMaxProfitStrategy(), k = 4), 300)
+        bestPortfolioSet(historyRequests, PortfolioFinder3(strategy = PortfolioProfitsChartMaxProfitStrategy(), k = 5), 300)
     }
 
     private fun FlowContent.compareStrategies(
@@ -247,7 +269,7 @@ class HtmlReportPrinter(
                 +title
             }
             div(classes = "header-summary") {
-                +"$from - $to"
+                +"${from.year} - ${to.year}"
             }
             div(classes = "charts-section") {
                 histogramChart(
@@ -294,9 +316,11 @@ class HtmlReportPrinter(
     ) {
 
         val candles = historyRequests.map { TickerCandles(it.ticker, marketRepository.loadHistory(it)) }
-        val data: List<TickerCandles> = portfolioFinder.findBestSet(candles.filter { it.candles.size > period * 5 })
+        val data: List<TickerCandles> = portfolioFinder.findBestSet(candles.filter { it.candles.size > period })
         if (data.isNotEmpty()) {
-            portfolioSet(data.map { it.ticker }, period, historyRequests.first().from, historyRequests.first().to)
+            val tickers = data.map { it.ticker }.sorted()
+            portfolioSet(tickers, 300, OffsetDateTime.parse("2015-01-01T10:15:30+01:00"), OffsetDateTime.parse("2017-01-01T10:15:30+01:00"))
+            portfolioSet(tickers, 300, OffsetDateTime.parse("2015-01-01T10:15:30+01:00"), OffsetDateTime.parse("2020-09-01T10:15:30+01:00"))
         } else {
             logger.info("best portfolio set is empty")
         }
