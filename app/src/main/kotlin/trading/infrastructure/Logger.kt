@@ -7,7 +7,9 @@ import java.nio.file.Paths
 import java.util.logging.LogManager
 import java.util.logging.Logger
 
-val logger: Logger = initLogger()
+val logger: Logger by lazy {
+    initLogger()
+}
 
 private fun initLogger(): Logger {
     val logManager = LogManager.getLogManager()

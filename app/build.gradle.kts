@@ -21,6 +21,9 @@ dependencies {
     implementation(Libs.html)
     implementation(Libs.statistics)
 
+    implementation("com.github.doyaaaaaken:kotlin-csv-jvm:0.13.0")
+    implementation("org.jetbrains:kotlin-numpy:0.1.5")
+
     testImplementation(Libs.koin_test)
 }
 
