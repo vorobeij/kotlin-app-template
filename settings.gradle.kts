@@ -1,5 +1,3 @@
-rootProject.name = "trading-client"
-include("tinkoff-api")
-include("tinkoff-api-sdk-java-8")
+rootProject.name = "kotlin-app-template"
 include("ktlint")
 include("app")
