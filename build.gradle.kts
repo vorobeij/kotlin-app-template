@@ -4,8 +4,8 @@ buildscript {
     }
 
     dependencies {
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.7.10")
-        classpath("com.pinterest:ktlint:0.46.1")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${Versions.kotlin}")
+        classpath("com.pinterest:ktlint:${Versions.ktlint}")
     }
 }
 
@@ -24,6 +24,6 @@ allprojects {
     }
     val implementation by configurations
     dependencies {
-        implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.7.10")
+        implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:${Versions.kotlin}")
     }
 }
