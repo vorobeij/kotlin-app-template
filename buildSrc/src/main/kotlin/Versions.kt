@@ -1,6 +1,10 @@
+import org.gradle.api.JavaVersion
+
 object Versions {
 
-    const val kotlin = "1.4.0"
+    val JAVA = JavaVersion.VERSION_14
+
+    const val kotlin = "1.7.10"
     const val kotlin_serialization_core = "1.0.0-RC"
 
     const val gradle_android = "4.0.1"
@@ -58,7 +62,7 @@ object Versions {
 
     internal const val desugar_jdk = "1.0.7"
 
-    const val ktlint = "0.38.1"
+    const val ktlint = "0.46.1"
 
     internal const val anko = "0.10.8"
 
@@ -73,13 +77,13 @@ object Versions {
     object Test {
 
         const val androidx_core = "1.3.0"
-        const val assertj = "3.10.0"
+        const val assertj = "3.23.1"
         const val espresso = "3.3.0"
         const val json = "20140107"
         const val junit = "1.1.2"
         const val junitJupiter = "5.3.1"
         const val kakao: String = "2.3.2"
-        const val kluent = "1.61"
+        const val kluent = "1.68"
         const val mockitoInline = "3.5.10"
         const val mockitoNHaarmann = "2.1.0"
         const val robolectric = "4.4"

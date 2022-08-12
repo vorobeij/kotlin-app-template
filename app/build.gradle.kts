@@ -8,8 +8,6 @@ dependencies {
     implementation(kotlin("stdlib"))
 
     implementation(Libs.koin_core)
-    implementation(Libs.koin_core_ext)
-
     testImplementation(Libs.koin_test)
 }
 

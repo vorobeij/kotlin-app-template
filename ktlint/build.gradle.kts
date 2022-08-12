@@ -1,9 +1,10 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 val compileKotlin: KotlinCompile by tasks
-compileKotlin.kotlinOptions.jvmTarget = "1.8"
+compileKotlin.kotlinOptions.jvmTarget = Versions.JAVA.toString()
 val compileTestKotlin: KotlinCompile by tasks
-compileTestKotlin.kotlinOptions.jvmTarget = "1.8"
+compileTestKotlin.kotlinOptions.jvmTarget = Versions.JAVA.toString()
+
 plugins {
     id("java-library")
     id("kotlin")
@@ -15,8 +16,8 @@ dependencies {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = Versions.JAVA
+    targetCompatibility = Versions.JAVA
 }
 buildscript {
     repositories {
@@ -28,7 +29,6 @@ buildscript {
 }
 repositories {
     google()
-    jcenter()
     maven(url = "https://jitpack.io")
 }
 dependencies {

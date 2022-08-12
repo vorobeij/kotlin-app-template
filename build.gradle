@@ -1,34 +1,31 @@
 buildscript {
-    ext.kotlin_version = '1.4.10'
+    ext.kotlin_version = '1.7.10'
 
     repositories {
-        jcenter()
         mavenCentral()
     }
 
     dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.4.10"
-        classpath("com.pinterest:ktlint:0.38.1")
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.7.10"
+        classpath("com.pinterest:ktlint:0.46.1")
     }
 }
 
-allprojects{
+allprojects {
     apply plugin: "kotlin"
 
     repositories {
-        jcenter()
         mavenCentral()
     }
 
     compileKotlin {
         kotlinOptions {
-            jvmTarget = "1.8"
+            jvmTarget = JavaVersion.VERSION_14.toString()
             javaParameters = true
         }
     }
 
     dependencies {
-        compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.4.10"
+        implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.7.10"
     }
-
 }

@@ -83,9 +83,8 @@ object Libs {
     const val reactive_streams = "org.reactivestreams:reactive-streams:1.0.3"
     const val jupiter = "org.junit.jupiter:junit-jupiter:5.5.2"
 
-    const val koin_core = "org.koin:koin-core:" + Versions.koin
-    const val koin_core_ext = "org.koin:koin-core-ext:" + Versions.koin
-    const val koin_test = "org.koin:koin-test:" + Versions.koin
+    const val koin_core = "io.insert-koin:koin-core:" + Versions.koin
+    const val koin_test = "io.insert-koin:koin-test:" + Versions.koin
 
     const val html = "org.jetbrains.kotlinx:kotlinx-html-jvm:" + Versions.kotlinx_html_version
     const val statistics = "org.nield:kotlin-statistics:1.2.1"
