@@ -1,0 +1,21 @@
+repositories {
+    mavenCentral()
+    maven { url = "https://jitpack.io" }
+}
+
+dependencies {
+    detektPlugins("com.github.vorobeij:detekt-rules:master-SNAPSHOT")
+}
+
+detekt {
+    source = files("src/main/kotlin")
+    parallel = true
+    config = files("${rootDir.absolutePath}/gradle/detekt/detekt-config.yml")
+    allRules = true
+    debug = true
+    ignoreFailures = false
+    basePath = rootDir.absolutePath
+    autoCorrect = true
+}
+
+tasks.withType(GradleBuild) { dependsOn("detekt") }

@@ -2,7 +2,8 @@ plugins {
     kotlin("jvm")
 }
 
-apply(from = "../defaults.gradle")
+apply(from = "${rootDir.absolutePath}/gradle/defaults.gradle")
+apply(from = "${rootDir.absolutePath}/gradle/detekt/detekt-config.gradle")
 
 dependencies {
     implementation(kotlin("stdlib"))
@@ -10,5 +11,3 @@ dependencies {
     implementation(Libs.koin_core)
     testImplementation(Libs.koin_test)
 }
-
-apply(from = "../ktlint.gradle.kts")
