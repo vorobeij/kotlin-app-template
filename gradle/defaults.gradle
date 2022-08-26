@@ -1,11 +1,11 @@
 dependencies {
-    implementation(Libs.kotlin_serialization_core)
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:_")
 
-    testImplementation(Libs.junit)
-    testImplementation(Libs.truth)
-    testImplementation(Libs.kluent)
-    testImplementation(Libs.mockitoCore)
-    testImplementation(Libs.mockitoInline)
-    testImplementation(Libs.mockK)
-    testImplementation(Libs.kotlin_coroutines_test)
+    testImplementation("junit:junit:_")
+    testImplementation("com.google.truth:truth:_")
+    testImplementation("org.amshove.kluent:kluent:_")
+    testImplementation("org.mockito:mockito-core:_")
+    testImplementation("org.mockito:mockito-inline:_")
+    testImplementation("io.mockk:mockk:_")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:_")
 }

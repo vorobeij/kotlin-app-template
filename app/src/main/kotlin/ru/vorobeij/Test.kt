@@ -7,7 +7,7 @@ class Test {
 
     companion object {
 
-        val test2 = ""
+        const val test2 = ""
         fun teee() = Unit
         private const val tes = ""
     }

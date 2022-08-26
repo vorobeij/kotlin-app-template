@@ -2,12 +2,21 @@ plugins {
     kotlin("jvm")
 }
 
-apply(from = "${rootDir.absolutePath}/gradle/defaults.gradle")
 apply(from = "${rootDir.absolutePath}/gradle/detekt/detekt-config.gradle")
 
 dependencies {
     implementation(kotlin("stdlib"))
+}
 
-    implementation(Libs.koin_core)
-    testImplementation(Libs.koin_test)
+// https://github.com/autonomousapps/dependency-analysis-android-gradle-plugin/wiki/Customizing-plugin-behavior
+dependencyAnalysis {
+    issues {
+        ignoreKtx(true)
+        onAny {
+            severity("fail")
+            exclude(
+                "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+            )
+        }
+    }
 }

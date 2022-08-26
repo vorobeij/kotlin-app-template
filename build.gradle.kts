@@ -5,11 +5,14 @@ buildscript {
     }
 
     dependencies {
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${Versions.kotlin}")
-        classpath("com.pinterest:ktlint:${Versions.ktlint}")
-        classpath("io.gitlab.arturbosch.detekt:detekt-gradle-plugin:1.21.0")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:_")
+        classpath("com.pinterest:ktlint:_")
+        classpath("io.gitlab.arturbosch.detekt:detekt-gradle-plugin:_")
+        classpath("com.autonomousapps:dependency-analysis-gradle-plugin:_")
     }
 }
+
+apply(plugin = "com.autonomousapps.dependency-analysis")
 
 val javaVersion = JavaVersion.VERSION_14
 
@@ -29,7 +32,7 @@ allprojects {
     val implementation by configurations
 
     dependencies {
-        implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:${Versions.kotlin}")
+        implementation(Kotlin.stdlib.jdk8)
     }
 }
 
@@ -38,7 +41,7 @@ allprojects{
     apply(plugin = "io.gitlab.arturbosch.detekt")
 
     configurations.all {
-        resolutionStrategy.cacheChangingModulesFor (0, "seconds")
+        resolutionStrategy.cacheChangingModulesFor(0, "seconds")
     }
 
     tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
@@ -47,4 +50,15 @@ allprojects{
     tasks.withType<io.gitlab.arturbosch.detekt.DetektCreateBaselineTask>().configureEach {
         jvmTarget = javaVersion.toString()
     }
+}
+
+tasks.register<GradleBuild>("runChecks") {
+    tasks = listOf(
+        "clean",
+        "buildHealth",
+        "build"
+    )
+    outputs
+        .dir(layout.buildDirectory.dir("runChecks"))
+        .withPropertyName("outputDir")
 }
