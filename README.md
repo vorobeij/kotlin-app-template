@@ -2,7 +2,7 @@
 
 ## Features:
 
-1. Detekt custom [ruleset](https://github.com/vorobeij/detekt-rules)
+1. Diktat custom [ruleset](./diktat-analysis.yml)
 2. `buildSrc` with common libraries
 3. `kts` build files
 4. pre-configured `.gitignore` file

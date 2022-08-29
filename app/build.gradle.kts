@@ -2,8 +2,6 @@ plugins {
     kotlin("jvm")
 }
 
-apply(from = "${rootDir.absolutePath}/gradle/detekt/detekt-config.gradle")
-
 dependencies {
     implementation(kotlin("stdlib"))
 }

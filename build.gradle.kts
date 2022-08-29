@@ -7,8 +7,8 @@ buildscript {
     dependencies {
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:_")
         classpath("com.pinterest:ktlint:_")
-        classpath("io.gitlab.arturbosch.detekt:detekt-gradle-plugin:_")
         classpath("com.autonomousapps:dependency-analysis-gradle-plugin:_")
+        classpath("org.cqfn.diktat:diktat-gradle-plugin:_")
     }
 }
 
@@ -34,21 +34,14 @@ allprojects {
     dependencies {
         implementation(Kotlin.stdlib.jdk8)
     }
-}
 
-// detekt
-allprojects{
-    apply(plugin = "io.gitlab.arturbosch.detekt")
-
-    configurations.all {
-        resolutionStrategy.cacheChangingModulesFor(0, "seconds")
-    }
-
-    tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
-        jvmTarget = javaVersion.toString()
-    }
-    tasks.withType<io.gitlab.arturbosch.detekt.DetektCreateBaselineTask>().configureEach {
-        jvmTarget = javaVersion.toString()
+    apply(plugin = "org.cqfn.diktat.diktat-gradle-plugin")
+    configure<org.cqfn.diktat.plugin.gradle.DiktatExtension> {
+        diktatConfigFile = rootProject.file("diktat-analysis.yml")
+        inputs {
+            exclude("src/resources/**/*.kt")
+            include("src/**/*.kt")
+        }
     }
 }
 
