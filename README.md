@@ -1,5 +1,11 @@
 # Template kotlin project
 
+To check build and test project:
+
+```shell
+./gradlew runChecks
+```
+
 ## Features:
 
 1. Diktat custom [ruleset](./diktat-analysis.yml)

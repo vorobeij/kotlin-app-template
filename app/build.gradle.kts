@@ -18,3 +18,5 @@ dependencyAnalysis {
         }
     }
 }
+
+apply(from = "$rootDir/jacoco.gradle")

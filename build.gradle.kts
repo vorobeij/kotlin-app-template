@@ -48,7 +48,9 @@ allprojects {
 tasks.register<GradleBuild>("runChecks") {
     tasks = listOf(
         "clean",
+        "jacocoTestCoverageVerification",
         "buildHealth",
+        "diktatFix",
         "build"
     )
     outputs
