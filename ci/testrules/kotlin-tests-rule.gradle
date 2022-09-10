@@ -1,0 +1,4 @@
+task kotlinTestRule(type: Exec) {
+    workingDir(projectDir)
+    commandLine 'sh', './ci/testrules/kotlin-tests-rule.sh'
+}

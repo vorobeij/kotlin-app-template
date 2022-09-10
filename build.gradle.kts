@@ -45,12 +45,25 @@ allprojects {
     }
 }
 
-tasks.register<GradleBuild>("runChecks") {
+apply(from = "./ci/testrules/kotlin-tests-rule.gradle")
+
+tasks.register<GradleBuild>("codeChecks") {
     tasks = listOf(
         "clean",
-        "jacocoTestCoverageVerification",
+        "refreshVersionsMigrate",
         "buildHealth",
         "diktatFix",
+        "jacocoTestCoverageVerification",
+        "kotlinTestRule"
+    )
+    outputs
+        .dir(layout.buildDirectory.dir("codeChecks"))
+        .withPropertyName("outputDir")
+}
+
+tasks.register<GradleBuild>("buildChecks") {
+    tasks = listOf(
+        "clean",
         "build"
     )
     outputs

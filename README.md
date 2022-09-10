@@ -3,7 +3,8 @@
 To check build and test project:
 
 ```shell
-./gradlew runChecks
+./gradlew codeChecks
+./gradlew buildChecks
 ```
 
 ## Features:
